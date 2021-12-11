@@ -36,7 +36,7 @@ var mainApp = document.getElementById("mainApp");
 
 mainApp.style.display = 'none';
 
-var socket = io('http://localhost:3000', { autoConnect: false });
+var socket = io({ autoConnect: false });
 
 usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
     console.log('event happened');
