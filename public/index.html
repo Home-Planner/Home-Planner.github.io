@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Home Planner</h1>
+    </nav>
+    <div class="usernameSelect" id="usernameSelect">
+        <form id="usernameForm">
+            <input id="username" autocomplete="off" placeholder="Your username..." />
+            <button>Send</button>
+        </form>
+    </div>
+
+    <main>
+        <div id="mainApp">
+            <img class="plan" src="/res/house.png"></img>
+            <button type="button" class="furniture"></button>
+            <button type="button" class="furniture"></button>
+            <button type="button" class="furniture"></button>
+
+        </div>
+        <div id="mouseCanvasDiv">
+            <canvas id="mouseCanvas" width="1920" height="1080"></canvas>
+        </div>
+            
+    </main>
+
+</body>
+<script src="https://kit.fontawesome.com/7368c40b21.js" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="src/scripts.js"></script>
+</html>
