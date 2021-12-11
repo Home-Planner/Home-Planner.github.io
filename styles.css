@@ -7,7 +7,8 @@ body {
 
 main{
   background-color: rgba(231, 231, 231, 0.856);
-
+  text-align: center;
+  height: 100%;
 }
 
 .navbar{
@@ -19,12 +20,6 @@ main{
 }
 
 .plan{
-  position: absolute;
-  margin: auto;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   width: 80%;
 }
 

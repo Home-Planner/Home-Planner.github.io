@@ -7,11 +7,6 @@ furnitures.forEach((furn) => {
     furn.classList.add("redborder");
   };
 
- 
-
-  /*function drag(e) {
-
-          }*/
   furn.addEventListener("mousedown", () => {
     window.addEventListener("mousemove", drag);
   });
