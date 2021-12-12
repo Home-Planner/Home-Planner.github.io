@@ -78,8 +78,6 @@ h1 {
 .furniture {
   position: absolute;
   cursor: pointer;
-  top: 20%;
-  left: 10%;
   transform: translate(-50%, -50%);
   z-index: 10;
 }
@@ -100,7 +98,6 @@ h1 {
   width: 5%;
   height: 0;
   padding-top: 4.37%;
-  transform: rotate(180deg);
 }
 
 .sofa

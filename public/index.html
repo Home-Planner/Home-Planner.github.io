@@ -9,32 +9,26 @@
     <title>Document</title>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>Home Planner</h1>
-    </nav>
-    <div class="usernameSelect" id="usernameSelect">
-        <form id="usernameForm">
-            <input id="username" autocomplete="off" placeholder="Your username..." />
-            <button>Send</button>
-        </form>
-    </div>
-
     <main>
         <!---JSP POURQUOI, le plan est toujours devant le curseur -->
-        <div id="userList">
-            <p id="textUL" style="color: black">Utilisateurs :<br></p>
-        </div>
         <div id="mainApp">
             <div id="mouseCanvasDiv">
                 <canvas id="mouseCanvas" width="1920" height="1080"></canvas>
                 <img class="plan" src="/res/house.png"></img>
             </div>
-            <button type="button" id="button1" class="furniture chair"></button>
-            <button type="button" id="button2" class="furniture bed"></button>
-            <button type="button" id="button3" class="furniture sofa"></button>
-
+            <button type="button" id="button1" class="furniture chair" style="top: 20%; left:10%;" ></button>
+            <button type="button" id="button2" class="furniture bed" style="top: 20%; left:17%;"></button>
+            <button type="button" id="button3" class="furniture sofa" style="top: 20%; left:25%;"></button>
         </div>
-        
+        <div class="usernameSelect" id="usernameSelect">
+            <form id="usernameForm">
+                <input id="username" autocomplete="off" placeholder="Your username..." />
+                <button>Send</button>
+            </form>
+        </div>
+        <div id="userList">
+            <p id="textUL" style="color: black">Utilisateurs :<br></p>
+        </div>
             
     </main>
 
