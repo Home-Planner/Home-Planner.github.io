@@ -3,8 +3,8 @@
     "",
     "\\public",
     "\\public\\css",
-    "\\server"
+    "\\public\\src"
   ],
-  "SelectedNode": "\\server.js",
+  "SelectedNode": "\\public\\src\\scripts.js",
   "PreviewInSolutionExplorer": false
 }

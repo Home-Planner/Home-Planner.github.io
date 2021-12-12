@@ -31,9 +31,25 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('otherCursors', { color: socket.color, pointerX: socket.pointerX, pointerY: socket.pointerY });
     });
 
+    socket.on('objectMove', (obj) => {
+        socket.broadcast.emit('broadcastMove', {
+            x: obj.x, y: obj.y, objId: obj.objId
+        });
+    });
+
+    socket.on('objectClick', (objId) => {
+        console.log('sent server id :' + objId);
+        io.emit('broadcastClick', { color: socket.color, objId: objId  });
+    });
+
+    socket.on('objectUnselect', (objId) => {
+        io.emit('broadcastUnselect', objId);
+    });
+
     io.emit("user connected", socket.username);
 
     socket.on('disconnect', () => {//connect et disconnect sont des keyword
+        //DESIGN UN SYSTEME DE REMPLACEMENT COULEUR
         console.log('user disconnected');
         currentUsers = currentUsers - 1;
     });
@@ -46,10 +62,12 @@ io.use((socket, next) => {
     }
     socket.username = username;
     socket.color = colors[currentUsers];
+    console.log("socket.color : " + socket.color);
     socket.pointerX = -1;
     socket.pointerY = -1;
+    console.log("handshake1 : " + currentUsers.toString());
     currentUsers = currentUsers + 1;
-    console.log("handshake");
+    console.log("handshake2 : " + currentUsers.toString());
     next();
 });
 

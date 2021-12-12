@@ -1,10 +1,22 @@
 const furnitures = document.querySelectorAll(".furniture");
+var ownedFurniture = null;
+var justClickedObject = false;
+
+document.onmousedown = function (event) {
+    if (ownedFurniture != null && !justClickedObject) {
+        socket.emit('objectUnselect', ownedFurniture.id);
+        ownedFurniture = null;
+        console.log("mouseDown");
+    }
+    justClickedObject = false;
+}
 
 furnitures.forEach((furn) => {
   const drag = (e) => {
     furn.style.top = e.pageY + "px";
-    furn.style.left = e.pageX + "px";
-    furn.classList.add("redborder");
+      furn.style.left = e.pageX + "px";
+      socket.emit("objectMove", { objId: furn.id, x: furn.style.left, y: furn.style.top });
+    //furn.classList.add("redborder");
   };
 
  
@@ -12,15 +24,23 @@ furnitures.forEach((furn) => {
   /*function drag(e) {
 
           }*/
-  furn.addEventListener("mousedown", () => {
-    window.addEventListener("mousemove", drag);
+    furn.addEventListener("mousedown", () => {
+      justClickedObject = true;
+      window.addEventListener("mousemove", drag);
+      console.log('sent client id :' + furn.id);
+        if (ownedFurniture != null) {
+            socket.emit('objectUnselect', ownedFurniture.id);
+        }
+      ownedFurniture = furn;
+      socket.emit("objectClick", furn.id); //plus tard on utilisera des ombres d'images jpense
   });
 
   window.addEventListener("mouseup", () => {
     window.removeEventListener("mousemove", drag);
-    furn.classList.remove("redborder");
+    //furn.classList.remove("redborder");
   });
 });
+
 
 var pointerX = -1;
 var pointerY = -1;
@@ -34,11 +54,16 @@ var usernameForm = document.getElementById("usernameForm");
 var usernameBlock = document.getElementById("usernameSelect");
 var mainApp = document.getElementById("mainApp");
 
-mainApp.style.display = 'none';
 
-var socket = io({ autoConnect: false });
 
-usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
+var socket = io();//{ autoConnect: false }//mainApp.style.display = 'none';
+
+//BLOCK POUR ID FLEMME
+usernameForm.style.display = 'none';
+socket.auth = { username: 'bruddah' + Math.random().toString() };
+socket.connect();
+isConnected = true;
+/*usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
     console.log('event happened');
     e.preventDefault();
     if (username.value) {
@@ -49,7 +74,7 @@ usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
         mainApp.style.display = 'block';
         isConnected = true;
     }
-});
+});*/
 
 document.onmousemove = function (event) {
     if (isConnected) {
@@ -76,7 +101,10 @@ form.addEventListener('submit', function (e) {
         inputMessage.value = '';
     }
 });*/
+
 /// SOCKET ACTIONS
+    
+
 socket.on("connect_error", (err) => {
     if (err.message === "invalid username") {
         console.log("erreur on verra plus tar");
@@ -88,6 +116,24 @@ socket.on('otherCursors', (cursorInfo) => {
     mouseCtx.clearRect(0, 0, 3000, 3000);
     mouseCtx.fillRect(cursorInfo.pointerX, cursorInfo.pointerY, 5, 5);
     //socket.emit('consoleLog', 'drawing other cursors');
+});
+
+socket.on('broadcastClick', (obj) => {
+    console.log(obj.color);
+    var furn = document.getElementById(obj.objId);
+    //console.log('received client id :' + obj.objId);
+    
+    furn.style.border = '10px solid ' + obj.color;
+});
+
+socket.on('broadcastUnselect', (objId) => {
+    var furn = document.getElementById(objId);
+    furn.style.border = 'none';
+})
+socket.on('broadcastMove', (obj) => {
+    var furn = document.getElementById(obj.objId);
+    furn.style.left = obj.x;
+    furn.style.top = obj.y;
 });
 
 socket.on("users", (users) => {
@@ -104,6 +150,9 @@ socket.on("users", (users) => {
     });
 });
 
+function draw() {
+    ctx.clearRect(0, 0, 1920, 1080);
+}
 /*socket.on("user connected", (user) => {
     socket.emit('chat message', user + ' just connected');
     this.users.push(user);
