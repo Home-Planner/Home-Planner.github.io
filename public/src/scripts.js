@@ -14,16 +14,11 @@ document.onmousedown = function (event) {
 furnitures.forEach((furn) => {
   const drag = (e) => {
     furn.style.top = e.pageY + "px";
-      furn.style.left = e.pageX + "px";
-      socket.emit("objectMove", { objId: furn.id, x: furn.style.left, y: furn.style.top });
+    furn.style.left = e.pageX + "px";
+    socket.emit("objectMove", { objId: furn.id, x: furn.style.left, y: furn.style.top });
     //furn.classList.add("redborder");
   };
 
- 
-
-  /*function drag(e) {
-
-          }*/
     furn.addEventListener("mousedown", () => {
       justClickedObject = true;
       window.addEventListener("mousemove", drag);
@@ -124,7 +119,7 @@ socket.on('broadcastClick', (obj) => {
     var furn = document.getElementById(obj.objId);
     //console.log('received client id :' + obj.objId);
     
-    furn.style.border = '10px solid ' + obj.color;
+    furn.style.border = '5px solid ' + obj.color;
 });
 
 socket.on('broadcastUnselect', (objId) => {

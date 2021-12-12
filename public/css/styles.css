@@ -7,7 +7,6 @@ body {
 
 main{
   background-color: rgba(231, 231, 231, 0.856);
-
 }
 
 .mainApp{
@@ -24,8 +23,6 @@ main{
 
 .mouseCanvasDiv {
     display:inline-block;
-    width:320px; 
-    height:480px;
     margin: 0 auto; 
     background: black; 
     position:relative; 
@@ -80,26 +77,49 @@ h1 {
 
 .furniture {
   position: absolute;
-  height: 60px;
-  width: 60px;
-  background-color: darkcyan;
-  color: #fff;
-  border: none;
-  font-size: 1.4em;
   cursor: pointer;
-  box-shadow: 5px 5px 40px #000;
-  outline: none;
-  top: 10%;
-  right: 0;
+  top: 20%;
+  left: 10%;
   transform: translate(-50%, -50%);
   z-index: 10;
 }
   
 .redborder{
-  border: 10px solid red;
+  border: 2px solid red;
 }
 
 #mouseCanvas{
   position: relative;
   z-index: 5;
+}
+
+.chair{
+  background-image: url('/res/chair.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 5%;
+  height: 0;
+  padding-top: 4.37%;
+  transform: rotate(180deg);
+}
+
+.sofa
+{
+  background-image: url('/res/sofa.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 8%;
+  height: 0;
+  padding-top: 3.94%;
+
+}
+
+.bed
+{
+  background-image: url('/res/bed.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 5%;
+  height: 0;
+  padding-top: 5.8%;
 }
