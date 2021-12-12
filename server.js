@@ -19,7 +19,7 @@ io.on('connection', (socket) => {
             username: socket.username,
         });
     }
-    socket.emit("users", users);
+    io.emit("users", users);
 
     socket.on('consoleLog', (msg) => {
         console.log("client log: ", msg);

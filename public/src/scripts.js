@@ -57,10 +57,11 @@ var mainApp = document.getElementById("mainApp");
 
 
 var socket = io();//{ autoConnect: false }//mainApp.style.display = 'none';
-
+var idnumber = Math.floor(Math.random() * 10);
 //BLOCK POUR ID FLEMME
+console.log(Math.floor(Math.random() * 10));
 usernameForm.style.display = 'none';
-socket.auth = { username: 'bruddah' + Math.random().toString() };
+socket.auth = { username: 'bruddah' + idnumber.toString() };
 socket.connect();
 isConnected = true;
 /*usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
@@ -136,10 +137,12 @@ socket.on('broadcastMove', (obj) => {
     furn.style.top = obj.y;
 });
 
+var userList = document.getElementById("textUL");
 socket.on("users", (users) => {
+    userList.innerHTML = '';
     users.forEach((user) => {
         user.self = user.userID === socket.id;
-        //initReactiveProperties(user);
+        userList.innerHTML += user.username + "<br>";
     });
     // put the current user first, and then sort by username
     this.users = users.sort((a, b) => {
