@@ -7,10 +7,10 @@ body {
 
 main{
   background-color: rgba(231, 231, 231, 0.856);
-
 }
 
 .mainApp{
+    cursor: inherit;
     z-index: 1;
 }
 
@@ -51,6 +51,7 @@ main{
   right: 0;
   bottom: 0;
   width: 80%;
+  height: auto;
 }
 
 *
@@ -71,6 +72,19 @@ h1 {
   font-size: 40px;
 }
 
+.toolbar{
+    cursor: pointer;
+    list-style-type:none;
+    position: absolute;
+    left: 1000px;
+    top: 200px;
+}
+
+.toolimg{
+    height: 50px;
+    width: 50px;
+
+}
 .furniture {
   position: absolute;
   height: 60px;
@@ -79,7 +93,7 @@ h1 {
   color: #fff;
   border: none;
   font-size: 1.4em;
-  cursor: pointer;
+  cursor: inherit;
   box-shadow: 5px 5px 40px #000;
   outline: none;
   top: 10%;

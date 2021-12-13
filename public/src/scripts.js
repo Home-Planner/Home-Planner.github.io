@@ -1,7 +1,9 @@
 const furnitures = document.querySelectorAll(".furniture");
 var ownedFurniture = null;
 var justClickedObject = false;
+var currentTool;
 
+//BUTTON ACTIONS
 document.onmousedown = function (event) {
     if (ownedFurniture != null && !justClickedObject) {
         socket.emit('objectUnselect', ownedFurniture.id);
@@ -11,37 +13,36 @@ document.onmousedown = function (event) {
     justClickedObject = false;
 }
 
-furnitures.forEach((furn) => {
-  const drag = (e) => {
-    furn.style.top = e.pageY + "px";
-      furn.style.left = e.pageX + "px";
-      socket.emit("objectMove", { objId: furn.id, x: furn.style.left, y: furn.style.top });
-    //furn.classList.add("redborder");
-  };
+function createObject() {
+    socket.emit('addObject', {
+        type: 'square',
+        x: '700px',
+        y: '350px',
+    });
+}
 
- 
-
-  /*function drag(e) {
-
-          }*/
-    furn.addEventListener("mousedown", () => {
-      justClickedObject = true;
-      window.addEventListener("mousemove", drag);
-      console.log('sent client id :' + furn.id);
-        if (ownedFurniture != null) {
-            socket.emit('objectUnselect', ownedFurniture.id);
-        }
-      ownedFurniture = furn;
-      socket.emit("objectClick", furn.id); //plus tard on utilisera des ombres d'images jpense
-  });
-
-  window.addEventListener("mouseup", () => {
-    window.removeEventListener("mousemove", drag);
-    //furn.classList.remove("redborder");
-  });
-});
-
-
+function activateTool(tool) {
+    var main = document.getElementById("main");
+    currentTool = tool;
+    switch (tool) {
+        case 'hand':
+            main.style.cursor = 'grab';
+            break;
+        case 'hammer':
+            main.style.cursor = 'url("res/hammer.cur"), auto';
+            break;
+        case 'brush':
+            main.style.cursor = 'url("res/brush.cur"), auto';
+            break;
+        case 'bin':
+            main.style.cursor = 'url("res/bin.cur"), auto';
+            console.log('activate bin');
+            break;
+        default:
+            break;
+    }
+}
+activateTool('hand');
 var pointerX = -1;
 var pointerY = -1;
 var isConnected = false; //placeholder
@@ -59,9 +60,8 @@ var mainApp = document.getElementById("mainApp");
 var socket = io();//{ autoConnect: false }//mainApp.style.display = 'none';
 var idnumber = Math.floor(Math.random() * 10);
 //BLOCK POUR ID FLEMME
-console.log(Math.floor(Math.random() * 10));
 usernameForm.style.display = 'none';
-socket.auth = { username: 'bruddah' + idnumber.toString() };
+socket.auth = { username: 'User' + idnumber.toString() };
 socket.connect();
 isConnected = true;
 /*usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
@@ -127,22 +127,81 @@ socket.on('broadcastClick', (obj) => {
     furn.style.border = '10px solid ' + obj.color;
 });
 
+var furnList = [];
+
+socket.on('broadcastObject', (obj) => {
+    var newFurn = document.createElement("button");
+    furnList.push(obj.id);
+    newFurn.setAttribute("id", obj.id);
+    newFurn.setAttribute("class", "furniture");
+    newFurn.style.left = obj.x;
+    newFurn.style.top = obj.y;
+    newFurn.style.border = obj.border;
+    mainApp.appendChild(newFurn);
+
+    const drag = (e) => {
+        if (currentTool == 'hand') {
+            newFurn.style.top = e.pageY + "px";
+            newFurn.style.left = e.pageX + "px";
+            socket.emit("objectMove", { id: newFurn.id, x: newFurn.style.left, y: newFurn.style.top });
+        }  
+    };
+
+    newFurn.addEventListener("mousedown", () => {
+        justClickedObject = true;
+        if (ownedFurniture != null) {
+            socket.emit('objectUnselect', ownedFurniture.id);
+        }
+        ownedFurniture = newFurn;
+        //hand
+        window.addEventListener("mousemove", drag);
+        socket.emit('consoleLog', 'clicked on : ' + newFurn.id);
+        socket.emit("objectClick", newFurn.id); //plus tard on utilisera des ombres d'images jpense
+        //bin
+        if (currentTool == 'bin') {
+            socket.emit('objectRemove', { obj: newFurn, id: newFurn.id });
+            socket.emit('consoleLog', 'attempted removal');
+        }
+    });
+
+    window.addEventListener("mouseup", () => {
+        window.removeEventListener("mousemove", drag);
+    });
+});
+
+
 socket.on('broadcastUnselect', (objId) => {
     var furn = document.getElementById(objId);
     furn.style.border = 'none';
 })
 socket.on('broadcastMove', (obj) => {
-    var furn = document.getElementById(obj.objId);
+    var furn = document.getElementById(obj.id);
     furn.style.left = obj.x;
     furn.style.top = obj.y;
 });
 
+socket.on('broadcastRemove', (objId) => {
+    console.log('object ' + objId + 'removed step 2');
+    var furn = document.getElementById(objId);
+    furn.remove();
+    
+});
+
+socket.on('clearObject', function () {
+    var furnBuffer;
+    for (let id of furnList) {
+        furnBuffer = document.getElementById(id);
+        furnBuffer.remove();
+    }
+});
 var userList = document.getElementById("textUL");
 socket.on("users", (users) => {
-    userList.innerHTML = '';
+    userList.innerHTML = 'Utilisateurs :<br>\n';
     users.forEach((user) => {
         user.self = user.userID === socket.id;
-        userList.innerHTML += user.username + "<br>";
+        var string = '<p style="color:' + user.color + '; font-weight:bold;">' + user.username + '</p>\n';
+        
+        userList.innerHTML += string;
     });
     // put the current user first, and then sort by username
     this.users = users.sort((a, b) => {
@@ -156,14 +215,3 @@ socket.on("users", (users) => {
 function draw() {
     ctx.clearRect(0, 0, 1920, 1080);
 }
-/*socket.on("user connected", (user) => {
-    socket.emit('chat message', user + ' just connected');
-    this.users.push(user);
-});
-
-socket.on('chat message', function (msg) {
-    var item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-});*/

@@ -19,22 +19,31 @@
         </form>
     </div>
 
-    <main>
+    <main id="main">
         <!---JSP POURQUOI, le plan est toujours devant le curseur -->
         <div id="userList">
             <p id="textUL" style="color: black">Utilisateurs :<br></p>
         </div>
+        <ul class="toolbar">
+            <li><button type="button" menu="hand" onclick="activateTool('hand')"><img src="/res/hand.png" class="toolimg" /> </button></li>
+            <li><button type="button" menu="hammer" onclick="activateTool('hammer')"><img src="/res/hammer.png" class="toolimg" /></button></li>
+            <li><button type="button" menu="brush" onclick="activateTool('brush')"><img src="/res/brush.png" class="toolimg" /> </button></li>
+            <br />
+            <br />
+            <button type="button" menu="bin" onclick="activateTool('bin')"><img src="/res/bin.png" style="height: 60px; width: 50px;" /> </button>
+            <br />
+            <button type="button" menu="placeholder" onclick="createObject()">Placeholder create object</button>
+
+        </ul>
         <div id="mainApp">
-            <img class="plan" src="/res/house.png"></img>
-            <button type="button" id="button1" class="furniture"></button>
-            <button type="button" id="button2" class="furniture"></button>
-            <button type="button" id="button3" class="furniture"></button>
+            <!--<img class="plan" src="/res/house.png">--->
+
 
         </div>
         <div id="mouseCanvasDiv">
             <canvas id="mouseCanvas" width="1920" height="1080"></canvas>
         </div>
-            
+
     </main>
 
 </body>
