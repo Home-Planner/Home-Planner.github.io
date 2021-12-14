@@ -27,7 +27,7 @@ main{
     background: black; 
     position:relative; 
     border:5px solid black; 
-    border-radius: 10px; 
+    border-radius: 5px; 
     box-shadow: 0 5px 50px #333
 }
 
@@ -75,20 +75,30 @@ h1 {
   font-size: 40px;
 }
 
+.toolbar{
+    cursor: pointer;
+    list-style-type: 'none';
+    position: absolute;
+    left: 85%;
+    top: 30%;
+    z-index: 9;
+}
+
+.toolimg{
+    height: 50px;
+    width: 50px;
+}
 .furniture {
   position: absolute;
-  cursor: pointer;
+  cursor: inherit;
   transform: translate(-50%, -50%);
   z-index: 10;
 }
-  
-.redborder{
-  border: 2px solid red;
-}
+
 
 #mouseCanvas{
   position: relative;
-  z-index: 5;
+  z-index: 1;
 }
 
 .chair{

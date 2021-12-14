@@ -9,17 +9,11 @@
     <title>Document</title>
 </head>
 <body>
-    <main>
-        <!---JSP POURQUOI, le plan est toujours devant le curseur -->
-        <div id="mainApp">
-            <div id="mouseCanvasDiv">
-                <canvas id="mouseCanvas" width="1920" height="1080"></canvas>
-                <img class="plan" src="/res/house.png"></img>
-            </div>
-            <button type="button" id="button1" class="furniture chair" style="top: 20%; left:10%;" ></button>
-            <button type="button" id="button2" class="furniture bed" style="top: 20%; left:17%;"></button>
-            <button type="button" id="button3" class="furniture sofa" style="top: 20%; left:25%;"></button>
-        </div>
+    <main id="main">
+        <!---
+
+    JSP POURQUOI, le plan est toujours devant le curseur -->
+        <img class="plan" src="/res/house.png"></img>
         <div class="usernameSelect" id="usernameSelect">
             <form id="usernameForm">
                 <input id="username" autocomplete="off" placeholder="Your username..." />
@@ -29,7 +23,23 @@
         <div id="userList">
             <p id="textUL" style="color: black">Utilisateurs :<br></p>
         </div>
-            
+        <div id="mouseCanvasDiv">
+            <canvas id="mouseCanvas" width="100%" height="100%"></canvas>
+
+        </div>
+
+
+        <div class="toolbar">
+            <button type="button" menu="hand" onclick="activateTool('hand')"><img src="/res/hand.png" class="toolimg" /> </button><br />
+            <button type="button" menu="hammer" onclick="activateTool('hammer')"><img src="/res/hammer.png" class="toolimg" /></button><br />
+            <button type="button" menu="brush" onclick="activateTool('brush')"><img src="/res/brush.png" class="toolimg" /> </button>
+            <br />
+            <br />
+            <button type="button" menu="bin" onclick="activateTool('bin')"><img src="/res/bin.png" style="height: 60px; width: 50px;" /> </button>
+            <br />
+            <button type="button" menu="placeholder" onclick="createObject()">Placeholder create object</button>
+        </div>
+
     </main>
 
 </body>
