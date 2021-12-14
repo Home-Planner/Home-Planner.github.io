@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+    <script src="src/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/jquery.toolbar.css">
+
     <title>Document</title>
 </head>
 <body>
@@ -30,20 +33,23 @@
 
 
         <div class="toolbar">
-            <button type="button" menu="hand" onclick="activateTool('hand')"><img src="/res/hand.png" class="toolimg" /> </button><br />
-            <button type="button" menu="hammer" onclick="activateTool('hammer')"><img src="/res/hammer.png" class="toolimg" /></button><br />
-            <button type="button" menu="brush" onclick="activateTool('brush')"><img src="/res/brush.png" class="toolimg" /> </button>
-            <br />
-            <br />
-            <button type="button" menu="bin" onclick="activateTool('bin')"><img src="/res/bin.png" style="height: 60px; width: 50px;" /> </button>
-            <br />
-            <button type="button" menu="placeholder" onclick="createObject()">Placeholder create object</button>
+            <button class="btn-toolbar btn-toolbar-dark" type="button" menu="hand" onclick="activateTool('hand')"><i class="far fa-hand-paper"></i></button>
+            <button class="btn-toolbar btn-toolbar-dark" type="button" menu="hammer" onclick="activateTool('hammer')"><i class="fas fa-hammer"></i></button>
+            <button class="btn-toolbar btn-toolbar-dark" type="button" menu="brush" onclick="activateTool('brush')"><i class="fas fa-paint-brush"></i> </button>
+            <button class="btn-toolbar btn-toolbar-dark" type="button" menu="bin" onclick="activateTool('bin')"><i class="fas fa-trash"></i></button>
+            <button id="toolbar-furniture" class="btn-toolbar btn-toolbar-dark" type="button" menu="placeholder"><i class="fas fa-box-open"></i></button>
         </div>
 
     </main>
 
+    <div id="toolbar-options" class="hidden">
+        <a href="#" onclick="createObject('bed')"><i class="fas fa-bed"></i></a>
+        <a href="#" onclick="createObject('sofa')"><i class="fas fa-couch"></i></a>
+        <a href="#" onclick="createObject('chair')"><i class="fas fa-chair"></i></a>
+     </div>
 </body>
 <script src="https://kit.fontawesome.com/7368c40b21.js" crossorigin="anonymous"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="src/jquery.toolbar.js"></script>*
 <script src="src/scripts.js"></script>
 </html>

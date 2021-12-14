@@ -5,6 +5,11 @@ var justClickedObject = false;
 var currentTool;
 var main = document.getElementById("main");
 
+$('#toolbar-furniture').toolbar({
+    content: '#toolbar-options',
+    position: 'left',
+});
+
 function randInt(bound) {
     return Math.floor(Math.random() * bound);
 }
@@ -18,9 +23,9 @@ document.onmousedown = function (event) {
     justClickedObject = false;
 }
 
-function createObject() {
+function createObject(furn) {
     socket.emit('addObject', {
-        type: furnitureType[randInt(furnitureType.length)],
+        type: furn,
         x: '700px',
         y: '350px',
     });

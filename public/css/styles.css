@@ -79,9 +79,13 @@ h1 {
     cursor: pointer;
     list-style-type: 'none';
     position: absolute;
-    left: 85%;
+    left: 90%;
     top: 30%;
     z-index: 9;
+}
+
+.toolbar > button{
+  margin: 10px;
 }
 
 .toolimg{
@@ -129,4 +133,9 @@ h1 {
   width: 5%;
   height: 0;
   padding-top: 5.8%;
+}
+
+a{
+  text-decoration: none;
+  color:rgba(231, 231, 231, 0.856);
 }
