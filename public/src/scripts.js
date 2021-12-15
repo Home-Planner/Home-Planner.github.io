@@ -145,22 +145,28 @@ socket.on('broadcastObject', (obj) => {
     newFurn.addEventListener("mousedown", () => {
         justClickedObject = true;
         //hand
+        socket.emit('consoleLog', 'hit object :' + newFurn.id);
         if (currentTool == 'bin') {
-            socket.emit('objectRemove', { obj: newFurn, id: newFurn.id });
+            socket.emit('forceUnselectAll', newFurn.id);
+            socket.emit('objectRemove', newFurn.id);
             socket.emit('consoleLog', 'attempted removal');
         } else {
             window.addEventListener("mousemove", drag);
             socket.emit("objectClick", newFurn.id); //plus tard on utilisera des ombres d'images jpense
+            window.addEventListener("mouseup", () => {
+                window.removeEventListener("mousemove", drag);
+            });
         }
         //bin
         
     });
 
-    window.addEventListener("mouseup", () => {
-        window.removeEventListener("mousemove", drag);
-    });
+    
 });
 
+socket.on('ownershipCheck1', (objId) => {
+    socket.emit('ownershipCheck2', objId);
+});
 document.onmousedown = function (event) {
     if (!justClickedObject) {
         socket.emit('consoleLog', "clicked off");
@@ -172,7 +178,6 @@ document.onmousedown = function (event) {
 socket.on('broadcastUnselect', (obj) => {
     var furn = document.getElementById(obj.id);
     var buffer = '';
-    socket.emit('consoleLog', 'del bordersize :' + obj.borderList.length);
     for (var i = 0; i < obj.borderList.length - 1; i++) {
         buffer += '0 0 0 ' + ((i + 1) * 4).toString() + 'px ' + obj.borderList[i] + ',';
     }

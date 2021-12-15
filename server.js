@@ -7,7 +7,7 @@ const io = new Server(server);
 
 var furnitureStatus = [];
 var currentUsers = 0;
-
+var objectCounter = 0;
 const colors = ['blue', 'red', 'yellow', 'black', 'green', 'purple'];
 app.use(express.static('public'));
 
@@ -30,6 +30,7 @@ function addDefaultFurniture() {
         y: '200px',
         borderList: [],
     });
+
     furnitureStatus.push({
         id: "button1",
         type: 'sofa',
@@ -44,7 +45,7 @@ function addDefaultFurniture() {
         y: '200px',
         borderList: [],
     });
-    console.log("create base furn");
+    objectCounter = 2;
 }
 
 addDefaultFurniture();
@@ -74,29 +75,40 @@ io.on('connection', (socket) => {
     });
 
     socket.on('addObject', (obj) => {
+        objectCounter++;
         var newFurn = {
-            id: 'button' + furnitureStatus.length,
+            id: 'button' + objectCounter.toString(),
             type: obj.type,
             x: obj.x,
             y: obj.y,
             borderList: [],
         };
         furnitureStatus.push(newFurn);
-        console.log('created object : ' + 'button' + furnitureStatus.length);
-        io.emit('broadcastObject', {
-            id: 'button' + furnitureStatus.length,
-            type: obj.type,
-            x: obj.x,
-            y: obj.y,
-            borderList: [],
-        });
+        console.log('created object : ' + 'button' + objectCounter.toString());
+        io.emit('broadcastObject', furnitureStatus[furnitureStatus.length - 1]);
     });
 
-    socket.on('objectRemove', (furn) => {
-        var furnIndex = furnitureStatus.indexOf(furn.obj);
+    socket.on('forceUnselectAll', (objId) => {
+        io.emit('ownershipCheck1', objId);
+    });
+
+    socket.on('ownershipCheck2', (objId) => {
+        if (socket.selectedFurniture == objId) {
+            socket.selectedFurniture = '';
+        } 
+    });
+
+    socket.on('objectRemove', (objId) => {
+        var furnIndex = -1;
+        for (var i = 0; i < furnitureStatus.length; i++) {
+            if (furnitureStatus[i].id == objId) {
+                furnIndex = i;
+                break;
+            }
+        }
         furnitureStatus.splice(furnIndex, 1);
-        io.emit('broadcastRemove', furn.id);
-        console.log('object ' + furn.id + 'removed step 1')
+        io.emit('broadcastRemove', objId);
+        console.log('object ' + objId + ' removed')
     });
 
     socket.on('cursorMove', (mousePosition) => {
