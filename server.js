@@ -10,7 +10,7 @@ var furnitureStatus = [];
 var ghostList = [];
 var currentUsers = 0;
 var objectCounter = 0;
-const colors = ['blue', 'red', 'green'];
+const colors = ['blue', 'red', 'green', 'purple', 'black', 'cyan'];
 app.use(express.static('public'));
 
 function contains(array, element) {
