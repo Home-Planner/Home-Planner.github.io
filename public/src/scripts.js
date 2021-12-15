@@ -1,6 +1,5 @@
 const furnitures = document.querySelectorAll(".furniture");
 const furnitureType = ['chair', 'bed', 'sofa'];
-var ownedFurniture = null;
 var justClickedObject = false;
 var currentTool;
 var main = document.getElementById("main");
@@ -14,14 +13,6 @@ function randInt(bound) {
     return Math.floor(Math.random() * bound);
 }
 //BUTTON ACTIONS
-document.onmousedown = function (event) {
-    if (ownedFurniture != null && !justClickedObject) {
-        socket.emit('objectUnselect', ownedFurniture.id);
-        ownedFurniture = null;
-        console.log("mouseDown");
-    }
-    justClickedObject = false;
-}
 
 function createObject(furn) {
     socket.emit('addObject', {
@@ -91,28 +82,11 @@ document.onmousemove = function (event) {
         pointerX = event.pageX;
         pointerY = event.pageY;
         if (mouseCanvas.getContext) {
-            /*ctx.strokeRect(50, 50, 50, 50);*/
-            /*ctx.fillStyle = 'blue';
-            ctx.clearRect(0, 0, 3000, 3000);
-            ctx.fillRect(pointerX, pointerY, 5, 5);*/
+
         }
         socket.emit('cursorMove', { x: pointerX, y: pointerY });
     }
 }
-
-/*var messages = document.getElementById('messages');
-var form = document.getElementById('form');
-var inputMessage = document.getElementById('inputMessage');
-
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (inputMessage.value) {
-        socket.emit('chat message', inputMessage.value);
-        inputMessage.value = '';
-    }
-});*/
-
-/// SOCKET ACTIONS
     
 
 socket.on("connect_error", (err) => {
@@ -125,15 +99,20 @@ socket.on('otherCursors', (cursorInfo) => {
     mouseCtx.fillStyle = cursorInfo.color;
     mouseCtx.clearRect(0, 0, 3000, 3000);
     mouseCtx.fillRect(cursorInfo.pointerX, cursorInfo.pointerY, 7, 7);
-    //socket.emit('consoleLog', 'drawing other cursors');
 });
 
 socket.on('broadcastClick', (obj) => {
-    console.log(obj.color);
-    var furn = document.getElementById(obj.objId);
-    //console.log('received client id :' + obj.objId);
-    
-    furn.style.border = '5px solid ' + obj.color;
+    var furn = document.getElementById(obj.id);
+    var buffer = '';
+        
+    for (var i = 0; i < obj.borderList.length - 1; i++) {
+        buffer += '0 0 0 ' + ((i + 1) * 4).toString() + 'px ' + obj.borderList[i] + ',';
+    }
+    if(obj.borderList.length > 0)
+        buffer += '0 0 0 ' + (obj.borderList.length * 4).toString() + 'px ' + obj.borderList[obj.borderList.length - 1];
+    furn.style.boxShadow = buffer;
+    //socket.emit('consoleLog', 'buffer :' + buffer);
+    //socket.emit('consoleLog', 'boxshadow :' + furn.style.boxShadow);
 });
 
 var furnList = [];
@@ -145,7 +124,14 @@ socket.on('broadcastObject', (obj) => {
     newFurn.setAttribute("class", "furniture " + obj.type);
     newFurn.style.left = obj.x;
     newFurn.style.top = obj.y;
-    newFurn.style.border = obj.border;
+    var buffer = '';
+
+    for (var i = 0; i < obj.borderList.length - 1; i++) {
+        buffer += '0 0 0 ' + ((i + 1) * 4).toString() + 'px ' + obj.borderList[i] + ',';
+    }
+    if (obj.borderList.length > 0)
+        buffer += '0 0 0 ' + (obj.borderList.length * 4).toString() + 'px ' + obj.borderList[obj.borderList.length - 1];
+    newFurn.style.boxShadow = buffer;
     main.appendChild(newFurn);
 
     const drag = (e) => {
@@ -158,20 +144,16 @@ socket.on('broadcastObject', (obj) => {
 
     newFurn.addEventListener("mousedown", () => {
         justClickedObject = true;
-        if (ownedFurniture != null) {
-            socket.emit('objectUnselect', ownedFurniture.id);
-        }
-        ownedFurniture = newFurn;
-        socket.emit('consoleLog', obj.id);
         //hand
-        window.addEventListener("mousemove", drag);
-        socket.emit('consoleLog', 'clicked on : ' + newFurn.id);
-        socket.emit("objectClick", newFurn.id); //plus tard on utilisera des ombres d'images jpense
-        //bin
         if (currentTool == 'bin') {
             socket.emit('objectRemove', { obj: newFurn, id: newFurn.id });
             socket.emit('consoleLog', 'attempted removal');
+        } else {
+            window.addEventListener("mousemove", drag);
+            socket.emit("objectClick", newFurn.id); //plus tard on utilisera des ombres d'images jpense
         }
+        //bin
+        
     });
 
     window.addEventListener("mouseup", () => {
@@ -179,11 +161,25 @@ socket.on('broadcastObject', (obj) => {
     });
 });
 
+document.onmousedown = function (event) {
+    if (!justClickedObject) {
+        socket.emit('consoleLog', "clicked off");
+        socket.emit('objectUnselect');
+    }
+    justClickedObject = false;
+}
 
-socket.on('broadcastUnselect', (objId) => {
-    var furn = document.getElementById(objId);
-    furn.style.border = 'none';
-})
+socket.on('broadcastUnselect', (obj) => {
+    var furn = document.getElementById(obj.id);
+    var buffer = '';
+    socket.emit('consoleLog', 'del bordersize :' + obj.borderList.length);
+    for (var i = 0; i < obj.borderList.length - 1; i++) {
+        buffer += '0 0 0 ' + ((i + 1) * 4).toString() + 'px ' + obj.borderList[i] + ',';
+    }
+    if (obj.borderList.length > 0)
+        buffer += '0 0 0 ' + (obj.borderList.length * 4).toString() + 'px ' + obj.borderList[obj.borderList.length - 1];
+    furn.style.boxShadow = buffer;
+});
 socket.on('broadcastMove', (obj) => {
     var furn = document.getElementById(obj.id);
     furn.style.left = obj.x;
@@ -206,6 +202,13 @@ socket.on('clearObject', function () {
 });
 var userList = document.getElementById("textUL");
 socket.on("users", (users) => {
+    this.users = users.sort((a, b) => {
+        if (a.self) return -1;
+        if (b.self) return 1;
+        if (a.username < b.username) return -1;
+        return a.username > b.username ? 1 : 0;
+    });
+
     userList.innerHTML = 'Utilisateurs :<br>\n';
     users.forEach((user) => {
         user.self = user.userID === socket.id;
@@ -214,14 +217,5 @@ socket.on("users", (users) => {
         userList.innerHTML += string;
     });
     // put the current user first, and then sort by username
-    this.users = users.sort((a, b) => {
-        if (a.self) return -1;
-        if (b.self) return 1;
-        if (a.username < b.username) return -1;
-        return a.username > b.username ? 1 : 0;
-    });
+    
 });
-
-function draw() {
-    ctx.clearRect(0, 0, 1920, 1080);
-}

@@ -11,27 +11,38 @@ var currentUsers = 0;
 const colors = ['blue', 'red', 'yellow', 'black', 'green', 'purple'];
 app.use(express.static('public'));
 
+function contains(array, element) {
+    for (let obj of array) {
+        if (obj == element) {
+            return true;
+        }
+    }
+    return false;
+}
+
+    
+
 function addDefaultFurniture() {
     furnitureStatus.push({
         id: "button0",
         type: 'chair',
         x: '200px',
         y: '200px',
-        border: 'none',
+        borderList: [],
     });
     furnitureStatus.push({
         id: "button1",
         type: 'sofa',
         x: '500px',
         y: '200px',
-        border: 'none',
+        borderList: [],
     });
     furnitureStatus.push({
         id: "button2",
         type: 'bed',
         x: '800px',
         y: '200px',
-        border: 'none',
+        borderList: [],
     });
     console.log("create base furn");
 }
@@ -59,7 +70,7 @@ io.on('connection', (socket) => {
     }
 
     socket.on('consoleLog', (msg) => {
-        console.log("client log: ", msg);
+        console.log(msg);
     });
 
     socket.on('addObject', (obj) => {
@@ -68,7 +79,7 @@ io.on('connection', (socket) => {
             type: obj.type,
             x: obj.x,
             y: obj.y,
-            border: 'none',
+            borderList: [],
         };
         furnitureStatus.push(newFurn);
         console.log('created object : ' + 'button' + furnitureStatus.length);
@@ -77,7 +88,7 @@ io.on('connection', (socket) => {
             type: obj.type,
             x: obj.x,
             y: obj.y,
-            border: 'none',
+            borderList: [],
         });
     });
 
@@ -107,21 +118,44 @@ io.on('connection', (socket) => {
     });
 
     socket.on('objectClick', (objId) => {
-        for (let obj of furnitureStatus) {
-            if (obj.id == objId) {
-                obj.border = '10px solid ' + socket.color;
+        if (objId != socket.selectedFurniture) {
+            //si on clique sur le meme objet, on ne veut pas briser l'ordre des bordures
+            for (let obj of furnitureStatus) {
+                if (obj.id == socket.selectedFurniture) {
+                    var shadowIndex = obj.borderList.indexOf(socket.color);
+                    obj.borderList.splice(shadowIndex, 1);
+                    io.emit('broadcastUnselect', { id: socket.selectedFurniture, borderList: obj.borderList });
+                    socket.selectedFurniture = '';
+                }
+            }
+
+            for (let obj of furnitureStatus) {
+                if (obj.id == objId) {
+                    if (!contains(obj.borderList, socket.color)) {
+                        socket.selectedFurniture = objId;
+                        obj.borderList.push(socket.color);
+                        io.emit('broadcastClick', {
+                            borderList: obj.borderList,
+                            id: objId,
+                        });
+                    }
+                }
             }
         }
-        io.emit('broadcastClick', { color: socket.color, objId: objId  });
+        
     });
 
-    socket.on('objectUnselect', (objId) => {
-        for (let obj of furnitureStatus) {
-            if (obj.id == objId) {
-                obj.border = 'none';
+    socket.on('objectUnselect', function () {
+        if (socket.selectedFurniture != '') {
+            for (let obj of furnitureStatus) {
+                if (obj.id == socket.selectedFurniture) {
+                    var shadowIndex = obj.borderList.indexOf(socket.color);
+                    obj.borderList.splice(shadowIndex, 1);
+                    io.emit('broadcastUnselect', { id: socket.selectedFurniture, borderList: obj.borderList });
+                    socket.selectedFurniture = '';
+                }
             }
-        }
-        io.emit('broadcastUnselect', objId);
+        } 
     });
 
     
@@ -140,7 +174,7 @@ io.use((socket, next) => {
         return next(new Error("invalid username"));
     }
     socket.username = username;
-
+    socket.selectedFurniture = '';
     socket.color = colors[0];
     colors.splice(0, 1);
     socket.pointerX = -1;
