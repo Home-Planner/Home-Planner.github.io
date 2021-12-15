@@ -5,6 +5,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+var users = [];
 var furnitureStatus = [];
 var currentUsers = 0;
 var objectCounter = 0;
@@ -54,17 +55,50 @@ io.on('connection', (socket) => {
     
     console.log("user connected : " + socket.username);
 
+    users.push({
+        userID: socket.username,
+        username: socket.username,
+        color: socket.color,
+        tool: socket.tool,
+    });
+
+    io.emit("users", users);
     socket.emit('clearObject');
 
-    const users = [];
-    for (let [id, socket] of io.of("/").sockets) {
-        users.push({
-            userID: id,
-            username: socket.username,
-            color: socket.color,
-        });
-    }
-    io.emit("users", users);
+    socket.on('updateTool', (updateTool) => {
+        var indexBuffer = -1;
+        console.log(users.length);
+        for (let user of users) {
+            console.log(socket.id);
+            console.log(user.userID);
+            if (socket.username == user.userID) {
+                console.log('are we finding user');
+                indexBuffer = users.indexOf(user);
+            }
+                
+        }
+        console.log(indexBuffer);
+        switch (updateTool) {
+            case 'hand':
+                users[indexBuffer].tool = "far fa-hand-paper";
+                break;
+            case 'hammer':
+                users[indexBuffer].tool = "fas fa-hammer";
+                break;
+            case 'brush':
+                users[indexBuffer].tool = "fas fa-paint-brush";
+                break;
+            case 'bin':
+                users[indexBuffer].tool = "fas fa-trash";
+                break;
+            default:
+                break;
+        }
+        io.emit("users", users);
+        console.log('server tool: ' + users[indexBuffer].tool);
+    });
+        
+
 
     for (let obj of furnitureStatus) {
         socket.emit('broadcastObject', obj);
@@ -74,6 +108,7 @@ io.on('connection', (socket) => {
         console.log(msg);
     });
 
+    
     socket.on('addObject', (obj) => {
         objectCounter++;
         var newFurn = {
@@ -175,6 +210,12 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {//connect et disconnect sont des keyword
         //DESIGN UN SYSTEME DE REMPLACEMENT COULEUR
         console.log('user disconnected: ' + socket.username);
+        var indexBuffer = -1;
+        for (let user of users) {
+            if (socket.id == user.userID)
+                indexBuffer = users.indexOf(user);
+        }
+        users.splice(indexBuffer, 1);
         colors.push(socket.color);
         currentUsers = currentUsers - 1;
     });
@@ -187,6 +228,7 @@ io.use((socket, next) => {
     }
     socket.username = username;
     socket.selectedFurniture = '';
+    socket.tool = 'none';
     socket.color = colors[0];
     colors.splice(0, 1);
     socket.pointerX = -1;

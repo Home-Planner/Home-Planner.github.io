@@ -41,10 +41,11 @@ function activateTool(tool) {
             break;
         default:
             break;
+            
     }
+    socket.emit('updateTool', tool);
 }
 
-activateTool('hand');
 var pointerX = -1;
 var pointerY = -1;
 var isConnected = false; //placeholder
@@ -61,7 +62,7 @@ var usernameBlock = document.getElementById("usernameSelect");
 var socket = io();//{ autoConnect: false }//main.style.display = 'none';
 //BLOCK POUR ID FLEMME
 usernameForm.style.display = 'none';
-socket.auth = { username: 'User' + randInt(10).toString() };
+socket.auth = { username: 'User' + randInt(100).toString() };
 socket.connect();
 isConnected = true;
 /*usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
@@ -77,6 +78,7 @@ isConnected = true;
     }
 });*/
 
+activateTool('hand');
 document.onmousemove = function (event) {
     if (isConnected) {
         pointerX = event.pageX;
@@ -88,7 +90,6 @@ document.onmousemove = function (event) {
     }
 }
     
-
 socket.on("connect_error", (err) => {
     if (err.message === "invalid username") {
         console.log("erreur on verra plus tar");
@@ -205,20 +206,19 @@ socket.on('clearObject', function () {
         furnBuffer.remove();
     }
 });
+
+var ULBuffer = '';
 var userList = document.getElementById("textUL");
+
 socket.on("users", (users) => {
-    this.users = users.sort((a, b) => {
-        if (a.self) return -1;
-        if (b.self) return 1;
-        if (a.username < b.username) return -1;
-        return a.username > b.username ? 1 : 0;
-    });
 
     userList.innerHTML = 'Utilisateurs :<br>\n';
     users.forEach((user) => {
         user.self = user.userID === socket.id;
-        var string = '<p style="color:' + user.color + '; font-weight:bold;">' + user.username + '</p>\n';
-        
+
+        socket.emit('consoleLog', 'tool: ' + user.tool);
+        var string = '<p style="color:' + user.color + '; font-weight:bold;">' + user.username + '</p> + <i class="' + user.tool + '"></i>\n';
+        socket.emit('consoleLog', string);
         userList.innerHTML += string;
     });
     // put the current user first, and then sort by username
