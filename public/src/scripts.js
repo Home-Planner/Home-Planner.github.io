@@ -1,6 +1,8 @@
 const furnitures = document.querySelectorAll(".furniture");
 const furnitureType = ['chair', 'bed', 'sofa'];
 var justClickedObject = false;
+var objectWasMoved = true;
+var ghostPosition = [];
 var currentTool;
 var main = document.getElementById("main");
 
@@ -62,7 +64,7 @@ var usernameBlock = document.getElementById("usernameSelect");
 var socket = io();//{ autoConnect: false }//main.style.display = 'none';
 //BLOCK POUR ID FLEMME
 usernameForm.style.display = 'none';
-socket.auth = { username: 'User' + randInt(100).toString() };
+socket.auth = { username: 'User' + randInt(10000).toString() };
 socket.connect();
 isConnected = true;
 /*usernameForm.addEventListener('submit', function (e) { //SUBMIT EST UN KEYWORD
@@ -112,8 +114,6 @@ socket.on('broadcastClick', (obj) => {
     if(obj.borderList.length > 0)
         buffer += '0 0 0 ' + (obj.borderList.length * 4).toString() + 'px ' + obj.borderList[obj.borderList.length - 1];
     furn.style.boxShadow = buffer;
-    //socket.emit('consoleLog', 'buffer :' + buffer);
-    //socket.emit('consoleLog', 'boxshadow :' + furn.style.boxShadow);
 });
 
 var furnList = [];
@@ -140,6 +140,7 @@ socket.on('broadcastObject', (obj) => {
             newFurn.style.top = e.pageY + "px";
             newFurn.style.left = e.pageX + "px";
             socket.emit("objectMove", { id: newFurn.id, x: newFurn.style.left, y: newFurn.style.top });
+            objectWasMoved = true;
         }  
     };
 
@@ -150,27 +151,69 @@ socket.on('broadcastObject', (obj) => {
         if (currentTool == 'bin') {
             socket.emit('forceUnselectAll', newFurn.id);
             socket.emit('objectRemove', newFurn.id);
-            socket.emit('consoleLog', 'attempted removal');
         } else {
             window.addEventListener("mousemove", drag);
+            ghostPosition = {
+                id: newFurn.id,
+                type: obj.type,
+                x: newFurn.style.left,
+                y: newFurn.style.top,
+            }
             socket.emit("objectClick", newFurn.id); //plus tard on utilisera des ombres d'images jpense
             window.addEventListener("mouseup", () => {
                 window.removeEventListener("mousemove", drag);
+                if (objectWasMoved
+                    ) {
+                    //Math.abs(ghostPosition.x - newFurn.style.left) > 100 &&
+                    //Math.abs(ghostPosition.y - newFurn.style.top) > 100
+                        socket.emit('consoleLog', 'ghost enter' + newFurn.id);
+                    socket.emit('createGhost', {
+                        
+                        id: ghostPosition.id,
+                        type: ghostPosition.type,
+                        x: ghostPosition.x,
+                        y: ghostPosition.y,
+                    });
+                    
+                }
             });
         }
         //bin
-        
+        objectWasMoved = false;
     });
 
     
 });
 
+socket.on('broadcastGhost', (ghost) => {
+    var newFurn = document.createElement("button");
+    newFurn.setAttribute("id", "ghost" + ghost.originalId);
+    newFurn.setAttribute("disabled", true);
+    newFurn.style.backgroundColor = ghost.color;
+    newFurn.setAttribute("class", "ghost " + ghost.type);
+    newFurn.style.left = ghost.x;
+    newFurn.style.top = ghost.y;
+
+    main.appendChild(newFurn);
+
+    var originalFurn = document.getElementById(ghost.originalId);
+    originalFurn.style.backgroundColor = ghost.color;
+});
+
+socket.on('removeGhost', (objId) => {
+    var originalFurn = document.getElementById(objId);
+    originalFurn.style.backgroundColor = '#ccc';
+
+    var ghost = document.getElementById('ghost' + objId);
+    ghost.remove();
+})
+
 socket.on('ownershipCheck1', (objId) => {
     socket.emit('ownershipCheck2', objId);
 });
+
 document.onmousedown = function (event) {
     if (!justClickedObject) {
-        socket.emit('consoleLog', "clicked off");
         socket.emit('objectUnselect');
     }
     justClickedObject = false;
@@ -193,7 +236,6 @@ socket.on('broadcastMove', (obj) => {
 });
 
 socket.on('broadcastRemove', (objId) => {
-    console.log('object ' + objId + 'removed step 2');
     var furn = document.getElementById(objId);
     furn.remove();
     
@@ -215,10 +257,7 @@ socket.on("users", (users) => {
     userList.innerHTML = 'Utilisateurs :<br>\n';
     users.forEach((user) => {
         user.self = user.userID === socket.id;
-
-        socket.emit('consoleLog', 'tool: ' + user.tool);
         var string = '<p style="color:' + user.color + '; font-weight:bold;">' + user.username + '</p> + <i class="' + user.tool + '"></i>\n';
-        socket.emit('consoleLog', string);
         userList.innerHTML += string;
     });
     // put the current user first, and then sort by username

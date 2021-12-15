@@ -99,11 +99,21 @@ h1 {
   z-index: 10;
 
     background-color: #ccc;
-  /* And so on and so forth, if you want border-ception */
+
   margin: 0 auto;
   padding: 3em;
 }
 
+.ghost {
+    position: absolute;
+    opacity: 0.4;
+    cursor: inherit;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    /* And so on and so forth, if you want border-ception */
+    margin: 0 auto;
+    padding: 3em;
+}
 
 #mouseCanvas{
   position: relative;

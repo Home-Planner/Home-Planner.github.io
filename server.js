@@ -7,9 +7,10 @@ const io = new Server(server);
 
 var users = [];
 var furnitureStatus = [];
+var ghostList = [];
 var currentUsers = 0;
 var objectCounter = 0;
-const colors = ['blue', 'red', 'yellow', 'black', 'green', 'purple'];
+const colors = ['blue', 'red', 'green'];
 app.use(express.static('public'));
 
 function contains(array, element) {
@@ -67,17 +68,13 @@ io.on('connection', (socket) => {
 
     socket.on('updateTool', (updateTool) => {
         var indexBuffer = -1;
-        console.log(users.length);
         for (let user of users) {
-            console.log(socket.id);
-            console.log(user.userID);
             if (socket.username == user.userID) {
-                console.log('are we finding user');
                 indexBuffer = users.indexOf(user);
             }
                 
         }
-        console.log(indexBuffer);
+
         switch (updateTool) {
             case 'hand':
                 users[indexBuffer].tool = "far fa-hand-paper";
@@ -95,13 +92,16 @@ io.on('connection', (socket) => {
                 break;
         }
         io.emit("users", users);
-        console.log('server tool: ' + users[indexBuffer].tool);
     });
         
 
 
     for (let obj of furnitureStatus) {
         socket.emit('broadcastObject', obj);
+    }
+
+    for (let ghost of ghostList) {
+        socket.emit('broadcastGhost', ghost);
     }
 
     socket.on('consoleLog', (msg) => {
@@ -119,8 +119,31 @@ io.on('connection', (socket) => {
             borderList: [],
         };
         furnitureStatus.push(newFurn);
-        console.log('created object : ' + 'button' + objectCounter.toString());
         io.emit('broadcastObject', furnitureStatus[furnitureStatus.length - 1]);
+    });
+
+    socket.on('createGhost', (obj) => {
+
+        var indexBuffer = -1;
+        for (var i = 0; i < ghostList.length; i++) {
+            if (ghostList[i].color == socket.color) {
+                indexBuffer = i;
+                break;
+            }
+        }
+        if (indexBuffer > -1) {
+            io.emit('removeGhost', ghostList[indexBuffer].originalId);
+            ghostList.splice(indexBuffer, 1);
+        }
+            
+        ghostList.push({
+            originalId: obj.id,
+            type: obj.type,
+            x: obj.x,
+            y: obj.y,
+            color: socket.color,
+        });
+        io.emit('broadcastGhost', ghostList[ghostList.length - 1]);
     });
 
     socket.on('forceUnselectAll', (objId) => {
@@ -143,7 +166,6 @@ io.on('connection', (socket) => {
         }
         furnitureStatus.splice(furnIndex, 1);
         io.emit('broadcastRemove', objId);
-        console.log('object ' + objId + ' removed')
     });
 
     socket.on('cursorMove', (mousePosition) => {
@@ -159,6 +181,7 @@ io.on('connection', (socket) => {
                 obj.y = newObj.y;
             }
         }
+        socket.broadcast.emit("broadcastGhost", )
         socket.broadcast.emit('broadcastMove', {
             x: newObj.x, y: newObj.y, id: newObj.id
         });
@@ -238,5 +261,4 @@ io.use((socket, next) => {
 });
 
 server.listen(3000, () => {//port
-    console.log('CTRL+C to exit');
 });
